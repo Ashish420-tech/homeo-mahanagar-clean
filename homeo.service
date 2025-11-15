@@ -1,0 +1,12 @@
+[Unit]
+Description=Homeo Mahanagar Docker Container
+After=network.target docker.service
+Requires=docker.service
+
+[Service]
+Restart=always
+ExecStart=/usr/bin/docker run --rm --name homeo -p 5000:5000 homeo-mahanagar:latest
+ExecStop=/usr/bin/docker stop homeo
+
+[Install]
+WantedBy=multi-user.target
