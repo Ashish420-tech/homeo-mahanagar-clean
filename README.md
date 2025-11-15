@@ -1,161 +1,214 @@
-# Homeo Mahanagar Project
+# Homeo Mahanagar – Flask App Deployment on AWS (Dockerized)
 
-## Project Overview
-
-This is a Python-based web application for managing Homeo Mahanagar products. The app is Dockerized and deployed on AWS EC2 for easy access and scalability.
-
-## Features
-
-* CRUD operations for homeopathy products
-* Dockerized application for seamless deployment
-* Ready for AWS EC2 deployment
-
-## Technology Stack
-
-* Python 3.x
-* Flask (or Django, depending on your project)
-* Docker
-* AWS EC2
-* Git & GitHub
+**Author:** Ashish Mondal  
+**Role Demonstrated:** System Administrator • Cloud (AWS) • Docker • Linux • Deployment Automation • Scripting
 
 ---
 
-## Setup Instructions
+## 📌 Project Overview
 
-### 1. Clone the Repository
+This project is a **Dockerized Flask web application** deployed on **AWS EC2 (Ubuntu Linux)**.  
+It demonstrates real-world System Administrator & DevOps skills, including:
 
+- Linux server setup and configuration  
+- Docker container build & deployment  
+- AWS EC2 hosting with security groups  
+- Python backend with Flask  
+- Backup automation (S3)  
+- Infra as Code (Terraform – optional)  
+- GitHub Actions CI/CD (optional sample workflow)  
+- Production-ready deployment steps  
+
+This project is used as part of my portfolio to showcase **System Administrator + Cloud + Automation** capabilities.
+
+
+---
+
+## 🏗 Architecture Diagram (Simple Overview)
+User → Internet → AWS EC2 Security Group (Port 5000) → Ubuntu EC2 Instance
+→ Docker Engine → Flask App Container
+→ Optional: S3 for backup, CloudWatch logs, IAM role
+
+
+(You can upload an `architecture.png` in the repo and embed it here.)
+
+---
+
+## 🚀 Features
+
+- CRUD-based Python/Flask web application  
+- Packaged into a Docker container for easy deployment  
+- Fully runnable on any Linux server or cloud VM  
+- AWS deployment steps included  
+- Backup script to S3 for disaster recovery  
+- Optional automation using Terraform & GitHub Actions  
+
+---
+
+# 🔧 Local Setup (Run on your machine)
+
+### **1. Clone this repo:**
 ```bash
-git clone https://github.com/your-username/homeo-mahanagar.git
-cd homeo-mahanagar
-```
+git clone https://github.com/Ashish420-tech/homeo-mahanagar-clean.git
+cd homeo-mahanagar-clean
 
-### 2. Build Docker Image
-
-```bash
+2. Build Docker image:
 docker build -t homeo-mahanagar:latest .
-```
 
-### 3. Run Docker Container
-
-```bash
+3. Run container:
 docker run -d -p 5000:5000 homeo-mahanagar:latest
-```
 
-### 4. Access Application
+Open the app:
+http://localhost:5000
 
-Open browser at: [http://localhost:5000](http://localhost:5000)
+☁️ AWS Deployment (EC2 – Ubuntu)
+Step 1 → Launch EC2 Instance
 
----
+OS: Ubuntu 20.04 LTS
 
-## AWS Deployment Instructions
+Type: t2.micro (Free-tier)
 
-### 1. Launch EC2 Instance
+Security Group Rules
 
-* Launch an Ubuntu EC2 instance on AWS.
-* Update packages:
+5000/tcp – allow public access
 
-```bash
-sudo apt update && sudo apt upgrade -y
-```
+22/tcp – your IP only (SSH)
 
-* Install Docker:
-
-```bash
+Step 2 → Install Docker on EC2
+sudo apt update -y
 sudo apt install docker.io -y
-sudo systemctl enable docker
-sudo systemctl start docker
-```
+sudo systemctl enable --now docker
 
-### 2. Transfer Project to EC2
+Step 3 → Copy project files to EC2
+scp -i /path/key.pem -r ./homeo-mahanagar-clean ubuntu@<EC2_PUBLIC_IP>:/home/ubuntu/
 
-```bash
-scp -i /path/to/your-key.pem -r ./homeo-mahanagar ubuntu@<EC2_PUBLIC_IP>:/home/ubuntu/
-```
-
-### 3. Build & Run Docker on EC2
-
-```bash
-cd /home/ubuntu/homeo-mahanagar
+Step 4 → Build & Run Docker Container
+cd homeo-mahanagar-clean
 docker build -t homeo-mahanagar:latest .
 docker run -d -p 5000:5000 homeo-mahanagar:latest
-```
 
-### 4. Access Application on EC2
+Access your app at:
+http://<EC2_PUBLIC_IP>:5000
 
-Open browser: `http://<EC2_PUBLIC_IP>:5000`
+🔄 Backup & Disaster Recovery (Optional)
+Backup script location:
 
----
+scripts/backup_to_s3.py
 
-## Troubleshooting
+This script uploads app data/logs to S3.
 
-### Docker Build Issues
+Example cron job for daily backup:
+0 2 * * * /usr/bin/python3 /home/ubuntu/homeo-mahanagar-clean/scripts/backup_to_s3.py >> /var/log/homeo_backup.log 2>&1
 
-* **Common Issue:** Missing dependencies in Dockerfile
-* **Solution:** Ensure `requirements.txt` has all Python packages:
+IAM Role needed for EC2:
 
-```bash
-pip install -r requirements.txt
-```
+s3:PutObject
 
-### Container Not Running
+s3:ListBucket
 
-* Check running containers:
+🏗 Infrastructure-as-Code (Optional)
 
-```bash
-docker ps
-```
+A minimal Terraform sample is provided in:
 
-* View container logs:
+infra/terraform/main.tf
 
-```bash
-docker logs <container_id>
-```
 
-* Stop container if needed:
+This automates:
 
-```bash
-docker stop <container_id>
-```
+EC2 instance creation
 
-### Stopping & Removing Containers
+Security Group creation
 
-```bash
-docker stop <container_id>
-docker rm <container_id>
-```
+Installing Docker via user_data
 
-### Terminate EC2 Instance
+You can expand this to full multi-tier architecture.
 
-* Log in to AWS Management Console → EC2 → Select Instance → Terminate
+⚙️ CI/CD (GitHub Actions)
 
----
+Sample workflow included:
 
-## Deployment Notes
+.github/workflows/deploy.yml
 
-* AWS EC2 instance used: t2.micro (free tier)
-* Steps followed: Docker build → Docker run → Port 5000 open in Security Group → Test app
-* Optional: Configure Nginx or reverse proxy for production
 
----
+This pipeline can:
 
-## GitHub Instructions
+Build Docker image
 
-### 1. Add & Commit Changes
+Save/transfer to EC2
 
-```bash
-git add .
-git commit -m "Initial commit with full project and documentation"
-```
+Restart container automatically
 
-### 2. Push to GitHub
+📁 Project Structure
+homeo-mahanagar-clean/
+│── app.py
+│── Dockerfile
+│── requirements.txt
+│── templates/
+│── static/
+│── scripts/
+│     └── backup_to_s3.py
+│── infra/
+│     └── terraform/
+│             └── main.tf
+└── README.md
 
-```bash
-git push origin main
-```
+🎯 System Administrator Skills Demonstrated
 
----
+This project demonstrates:
 
-## Author
+Linux Administration
 
-* Ashish Mondal
-* GitHub: [https://github.com/Ashish420-tech/homeo-mahanagar-clean](https://github.com/your-username)
+Package installation
+
+Services
+
+Permissions
+
+Cron jobs
+
+Logs
+
+Cloud (AWS)
+
+EC2 instance management
+
+Security groups
+
+IAM roles
+
+S3 backup
+
+Docker
+
+Image building
+
+Exposing ports
+
+Container lifecycle
+
+Networking
+
+Ports & firewall
+
+Public IP routing
+
+SG rules
+
+Python + Flask
+
+Web app basics
+
+Routing & templates
+
+Automation
+
+Backup script
+
+Terraform (IaC)
+
+GitHub Actions workflow
+
+👤 Author
+
+Ashish Mondal
+System Administrator | Cloud | Linux | Windows | Python
